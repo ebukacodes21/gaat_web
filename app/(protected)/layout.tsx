@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { routes } from "@/constants";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,16 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const role = getUserRole()
+  const [mounted, setMounted] = useState<boolean>(false);
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRole(getUserRole());
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navigationItems = [
     {
@@ -36,54 +45,70 @@ export default function DashboardLayout({
       label: "Overview",
       icon: LayoutDashboard,
       path: routes.DASHBOARD,
+      roles: ["admin", "supervisor", "staff", "user"],
     },
-    { id: "loans", 
-      label: "Loans", 
-      icon: BiMoneyWithdraw, 
-      path: routes.LOANS 
+    {
+      id: "loans",
+      label: "Loans",
+      icon: BiMoneyWithdraw,
+      path: routes.LOANS,
+      roles: ["admin", "supervisor", "staff"],
     },
     {
       id: "deposits",
       label: "Deposits",
       icon: PiHandDeposit,
       path: routes.DEPOSITS,
+      roles: ["admin", "supervisor", "staff"],
     },
     {
       id: "security",
       label: "Security",
       icon: MdSecurity,
       path: routes.SECURITY,
+      roles: ["admin", "supervisor", "staff", "user"],
     },
     {
       id: "profile",
       label: "Profile",
       icon: User,
       path: routes.PROFILE,
+      roles: ["admin", "supervisor", "staff", "user"],
     },
     {
       id: "management",
       label: "Management",
       icon: PiBuildingOfficeBold,
       path: routes.MANAGEMENT,
+      roles: ["admin", "supervisor"],
     },
-    { 
-      id: "users", 
-      label: "Users", 
-      icon: UsersIcon, 
-      path: routes.USERS 
+    {
+      id: "users",
+      label: "Users",
+      icon: UsersIcon,
+      path: routes.USERS,
+      roles: ["admin"],
     },
   ];
 
   const handleLogout = async () => {
     try {
-      await apiCall("/api/logout", "GET")
-      clearAuth()
-      router.push(routes.LOGIN)
-      toast.success("all session data cleared")
+      await apiCall("/api/logout", "GET");
+      clearAuth();
+      router.push(routes.LOGIN);
+      toast.success("all session data cleared");
     } catch (error) {
-      toast.error(formatErr(error))
+      toast.error(formatErr(error));
     }
   };
+
+  const allowedNavigation = navigationItems.filter((item) =>
+    item.roles.includes(role!),
+  );
+
+  if (!mounted || !role) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex bg-[#1A1816] text-[#E6E1DC]">
@@ -139,7 +164,7 @@ export default function DashboardLayout({
 
           {/* Nav Links */}
           <nav className="space-y-1.5">
-            {navigationItems.map((item) => {
+            {allowedNavigation.map((item) => {
               const Icon = item.icon;
 
               // Check if the current URL matches the item's path

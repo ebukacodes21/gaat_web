@@ -138,7 +138,7 @@ async function handleProxyRequest(
 
     return response;
   } catch (error: any) {
-    console.log(error)
+    console.log(error, "err")
     return NextResponse.json(
       {
         success: false,

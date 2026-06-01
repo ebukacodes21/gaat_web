@@ -19,11 +19,7 @@ import { Button } from "@/components/ui/button";
 // Icons & Presentation Assets
 import { GiReceiveMoney } from "react-icons/gi";
 import { VscLayersActive } from "react-icons/vsc";
-import {
-  RefreshCw,
-  ShieldCheck,
-  Wallet,
-} from "lucide-react";
+import { RefreshCw, ShieldCheck, Wallet } from "lucide-react";
 import { Calculator } from "@/components/calculator";
 import { LoanTable } from "@/components/loantable";
 import { Deposit, Loan } from "@/types";
@@ -91,8 +87,7 @@ export default function DashboardPage() {
     (loan) => loan.status.toLowerCase() === "approved",
   ).length;
 
-  const user = getDecodedUser()
-  console.log(user, getUserRole())
+  const user = getDecodedUser();
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#1A1816] text-[#E6E1DC] font-sans antialiased selection:bg-[#E6A15C]/20">
@@ -100,29 +95,6 @@ export default function DashboardPage() {
       <div className="flex-1 min-w-0 flex flex-col">
         {/* WORKSPACE APP MAIN FRAMING AREA */}
         <main className="p-8 max-w-7xl w-full mx-auto space-y-8 flex-1">
-          {/* PROFILE WELCOME BLOCK */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-[#FAF8F5]">
-                Welcome back {user?.email}
-              </h1>
-              <p className="text-xs text-[#A39990] mt-0.5">
-                Monitor your capital assets, tracking summaries, and projected
-                finance earnings in real time.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={fetchDashboardData}
-                className="h-9 gap-1.5 text-xs bg-[#211E1B] border-[#332D28] hover:bg-[#26221E] hover:text-[#FAF8F5] text-[#E6E1DC] rounded-xl"
-              >
-                <RefreshCw className="h-3.5 w-3.5" /> Refresh Accounts
-              </Button>
-            </div>
-          </div>
-
           {/* LOAD DIAGNOSTIC TILES */}
           {loading && (
             <div className="flex flex-col items-center justify-center min-h-[350px] w-full gap-3">
@@ -155,7 +127,31 @@ export default function DashboardPage() {
           )}
 
           {/* MAIN SECURE SYSTEM CONSOLE VIEWPORT */}
+          
           {!loading && !errorMessage && (
+            <>
+              {/* PROFILE WELCOME BLOCK */}
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-[#FAF8F5]">
+                Welcome back {user?.email}
+              </h1>
+              <p className="text-xs text-[#A39990] mt-0.5">
+                Monitor your capital assets, tracking summaries, and projected
+                finance earnings in real time.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchDashboardData}
+                className="h-9 gap-1.5 text-xs bg-[#211E1B] border-[#332D28] hover:bg-[#26221E] hover:text-[#FAF8F5] text-[#E6E1DC] rounded-xl"
+              >
+                <RefreshCw className="h-3.5 w-3.5" /> Refresh Accounts
+              </Button>
+            </div>
+          </div>
             <div className="space-y-6 animate-in fade-in duration-300">
               {/* TOP FINANCIAL OVERVIEW GRID */}
               <section className="grid gap-4 sm:grid-cols-2">
@@ -267,6 +263,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+            </>
           )}
         </main>
       </div>

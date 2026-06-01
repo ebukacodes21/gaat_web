@@ -17,174 +17,298 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { apiCall, formatErr } from "@/utils/helper";
-import { Loader2, Plus, Edit2 } from "lucide-react";
+import { Edit2, Plus, RefreshCw, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
+import { Card } from "./ui/card";
+import { cn } from "@/lib/utils";
 
 export default function StaffManagement() {
-  const [loanTypes, setLoanTypes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingLoan, setEditingLoan] = useState<any>(null);
-  const [formData, setFormData] = useState({ name: "", rate: "" });
+  // data
+  const [staffs, setStaffs] = useState<any[]>([]);
+  const [error, setError] = useState("");
 
-  const fetchLoanTypes = async () => {
+  // ui states
+  const [loading, setLoading] = useState(true); // page fetch
+  const [saving, setSaving] = useState(false); // dialog submit
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // edit state
+  const [editingStaff, setEditingStaff] = useState<any>(null);
+
+  // form
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    role: "staff",
+  });
+
+  const fetchStaffs = async () => {
     setLoading(true);
+    setError("");
     try {
-      const response = await apiCall("/api/loan_types", "GET");
-      setLoanTypes(response.data || []);
+      const res = await apiCall("/api/staffs", "GET");
+      setStaffs(res?.data?.items || []);
     } catch (err) {
-      toast.error(formatErr(err));
+      setError(formatErr(err));
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchStaffs();
+  }, []);
+
   const handleSave = async () => {
-    setLoading(true)
+    setSaving(true);
     try {
-      const payload = { ...formData, rate: formData.rate };
-      const endpoint = editingLoan
-        ? `/api/update_loan_type`
-        : `/api/create_loan_type`;
-      const method = editingLoan ? "PATCH" : "POST";
+      const endpoint = editingStaff ? "/api/update_staff" : "/api/create_staff";
+
+      const method = editingStaff ? "PATCH" : "POST";
 
       await apiCall(
         endpoint,
         method,
-        editingLoan ? { id: editingLoan.id, ...payload } : payload,
-      );
-      toast.success(
-        editingLoan
-          ? "Loan type updated successfully"
-          : "Loan type created successfully",
+        editingStaff ? { id: editingStaff.id, ...formData } : formData,
       );
 
-      fetchLoanTypes();
+      toast.success(editingStaff ? "Staff updated" : "Staff invited");
+
+      await fetchStaffs();
+
+      // reset state cleanly
+      setEditingStaff(null);
+      setFormData({ full_name: "", email: "", role: "staff" });
+      setIsDialogOpen(false);
     } catch (err) {
       toast.error(formatErr(err));
-    }finally {
-      setLoading(false)
-      setIsDialogOpen(false);
+    } finally {
+      setSaving(false);
     }
   };
 
-  useEffect(() => {
-    fetchLoanTypes();
-  }, []);
+  const toggleStaffStatus = async () => {
+    if (!editingStaff) return;
+
+    setSaving(true);
+    try {
+      const action = editingStaff.account_enabled ? "disable" : "enable";
+
+      const res = await apiCall("/api/manage_staff", "POST", {
+        id: editingStaff.id,
+        action: action,
+      });
+
+      toast.success(res?.message || `Staff ${action}d successfully`);
+
+      await fetchStaffs();
+      setIsDialogOpen(false);
+      setEditingStaff(null);
+    } catch (err) {
+      toast.error(formatErr(err));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-bold text-[#FAF8F5]">
-          Configured Loan Types
-        </h2>
-        <Button
-          onClick={() => {
-            setEditingLoan(null);
-            setFormData({ name: "", rate: "" });
-            setIsDialogOpen(true);
-          }}
-          className="bg-[#E6A15C] hover:bg-[#d4914c] text-neutral-950 font-bold rounded-xl text-xs"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Add New Loan Type
-        </Button>
-      </div>
+      {/* LOADING */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center min-h-[350px] gap-3">
+          <RefreshCw className="h-5 w-5 animate-spin text-[#E6A15C]" />
+          <span className="text-xs text-[#8C8176]">
+            Synchronizing records securely...
+          </span>
+        </div>
+      )}
 
-      <div className="border border-[#2C2621] bg-[#1A1715] rounded-xl overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-[#2C2621] hover:bg-transparent">
-              <TableHead className="text-[#8C8176]">Name</TableHead>
-              <TableHead className="text-[#8C8176] text-right">
-                Interest Rate (%)
-              </TableHead>
-              <TableHead className="text-[#8C8176] text-right">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={3} className="text-center py-8">
-                  <Loader2 className="animate-spin mx-auto text-[#E6A15C]" />
-                </TableCell>
-              </TableRow>
-            ) : (
-              loanTypes.map((loan) => (
-                <TableRow key={loan.id} className="border-[#2C2621]">
-                  <TableCell className="text-[#FAF8F5] font-semibold">
-                    {loan.name}
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-white">
-                    {loan.rate}%
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => {
-                        setEditingLoan(loan);
-                        setFormData({ name: loan.name, rate: loan.rate });
-                        setIsDialogOpen(true);
-                      }}
-                    >
-                      <Edit2 className="h-4 w-4 text-[#A39990]" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {/* ERROR */}
+      {!loading && error && (
+        <Card className="border-dashed border-red-900/40 bg-red-950/10 p-8 text-center rounded-2xl">
+          <ShieldCheck className="h-5 w-5 mx-auto text-red-400" />
+          <h3 className="mt-4 text-sm font-semibold text-[#FAF8F5]">
+            Sync Interrupted
+          </h3>
+          <p className="mt-1 text-xs text-[#8C8176]">{error}</p>
+        </Card>
+      )}
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="lg:max-w-3xl bg-[#1A1715] border-[#2C2621]">
-          <DialogHeader>
-            <DialogTitle className="text-[#FAF8F5]">
-              {editingLoan ? "Edit Loan Type" : "Create New Loan Type"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-1">
-              <label className="text-[10px] text-neutral-400 uppercase tracking-wider">
-                Loan Name
-              </label>
-              <Input
-                placeholder="e.g. School Fees Loan"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="bg-[#241F1B] text-white border-[#2C2621]"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] text-neutral-400 uppercase tracking-wider">
-                Interest Rate (%)
-              </label>
-              <Input
-                type="number"
-                placeholder="0.00"
-                value={formData.rate}
-                onChange={(e) =>
-                  setFormData({ ...formData, rate: e.target.value })
-                }
-                className="bg-[#241F1B] text-white border-[#2C2621]"
-              />
-            </div>
+      {/* CONTENT */}
+      {!loading && !error && (
+        <>
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-bold text-[#FAF8F5]">
+              Staff Management
+            </h2>
+
             <Button
-              onClick={handleSave}
-              className="w-full bg-[#E6A15C] text-neutral-950 font-bold hover:bg-[#d4914c]"
-              disabled={loading}
+              onClick={() => {
+                setEditingStaff(null);
+                setFormData({ full_name: "", email: "", role: "staff" });
+                setIsDialogOpen(true);
+              }}
+              className="bg-[#E6A15C] hover:bg-[#d4914c] text-neutral-950 font-bold rounded-xl text-xs"
             >
-              {loading ? "Saving...": "Save Changes"}
+              <Plus className="mr-2 h-4 w-4" />
+              Invite Employee
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+
+          {/* TABLE */}
+          <div className="border border-[#2C2621] bg-[#1A1715] overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-[#2C2621] hover:bg-transparent">
+                  <TableHead className="text-[#8C8176]">S/N</TableHead>
+                  <TableHead className="text-[#8C8176]">Full Name</TableHead>
+                  <TableHead className="text-[#8C8176]">Email</TableHead>
+                  <TableHead className="text-[#8C8176]">Role</TableHead>
+                  <TableHead className="text-[#8C8176] text-right">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {staffs.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="text-center py-10 text-[#8C8176]"
+                    >
+                      No staff records found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  staffs.map((s, i) => (
+                    <TableRow key={s.id} className="border-[#2C2621] hover:bg-transparent">
+                      <TableCell className="text-[#FAF8F5]">{i + 1}</TableCell>
+                      <TableCell className="text-[#FAF8F5] capitalize">
+                        {s.full_name}
+                      </TableCell>
+                      <TableCell className="text-[#FAF8F5]">
+                        {s.email}
+                      </TableCell>
+                      <TableCell className="text-[#FAF8F5] capitalize">
+                        {s.role}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => {
+                            setEditingStaff(s);
+                            setFormData({
+                              full_name: s.full_name ?? "",
+                              email: s.email ?? "",
+                              role: s.role ?? "staff",
+                            });
+                            setIsDialogOpen(true);
+                          }}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* DIALOG */}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="lg:max-w-3xl bg-[#1A1715] border-[#2C2621]">
+              <DialogHeader>
+                <DialogTitle className="text-[#FAF8F5]">
+                  {editingStaff ? "Edit Staff" : "Create New Staff"}
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <label className="text-[10px] text-neutral-400 uppercase">
+                  Full Name
+                </label>
+                <Input
+                  value={formData.full_name}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      full_name: e.target.value,
+                    })
+                  }
+                  className="bg-[#241F1B] border-[#2C2621] text-white capitalize"
+                />
+
+                <label className="text-[10px] text-neutral-400 uppercase">
+                  Email
+                </label>
+                <Input
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      email: e.target.value,
+                    })
+                  }
+                  className="bg-[#241F1B] border-[#2C2621] text-white"
+                />
+
+                <div className="flex justify-between">
+                  <Select
+                    value={formData.role}
+                    onValueChange={(val) =>
+                      setFormData({ ...formData, role: val })
+                    }
+                  >
+                    <SelectTrigger className="bg-[#241F1B] border-[#2C2621] text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1A1715] border-[#2C2621] text-white">
+                      <SelectItem value="staff">Staff</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="supervisor">Supervisor</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    type="button"
+                    onClick={toggleStaffStatus}
+                    disabled={saving || !editingStaff}
+                    className={cn(
+                      "font-bold",
+                      editingStaff?.account_enabled
+                        ? "bg-red-900/50 hover:bg-red-900 text-red-200"
+                        : "bg-green-900/50 hover:bg-green-900 text-green-200",
+                    )}
+                  >
+                    {editingStaff?.account_enabled
+                      ? "Disable Staff"
+                      : "Enable Staff"}
+                  </Button>
+                </div>
+
+                <Button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="w-full bg-[#E6A15C] hover:bg-[#E6A15C] text-black font-bold"
+                >
+                  {saving ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 }

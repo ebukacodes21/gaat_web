@@ -55,7 +55,7 @@ export function LoanTable({ data }: { data: Loan[] }) {
           </TableHeader>
           <TableBody>
             {data.map((loan, i) => (
-              <TableRow key={loan.id} className="border-[#2C2621] text-xs">
+              <TableRow key={loan.id} className="border-[#2C2621] text-xs hover:bg-transparent">
                 <TableCell className="font-medium">{i + 1}</TableCell>
                 <TableCell className="font-medium">{loan.loan_type}</TableCell>
                 <TableCell className="text-right font-mono">

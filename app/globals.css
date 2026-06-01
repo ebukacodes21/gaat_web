@@ -128,3 +128,7 @@
     @apply font-sans;
   }
 }
+
+.table-row:hover {
+  background-color: transparent !important;
+}

@@ -11,12 +11,14 @@ import {
   Menu,
   X,
   UsersIcon,
+  User,
 } from "lucide-react";
 import { BiMoneyWithdraw } from "react-icons/bi";
-import { PiHandDeposit } from "react-icons/pi";
+import { PiBuildingOfficeBold, PiHandDeposit } from "react-icons/pi";
 import toast from "react-hot-toast";
 import { apiCall, formatErr } from "@/utils/helper";
 import { clearAuth, getUserRole } from "@/utils/auth";
+import { MdSecurity } from "react-icons/md";
 
 export default function DashboardLayout({
   children,
@@ -35,7 +37,11 @@ export default function DashboardLayout({
       icon: LayoutDashboard,
       path: routes.DASHBOARD,
     },
-    { id: "loans", label: "Loans", icon: BiMoneyWithdraw, path: routes.LOANS },
+    { id: "loans", 
+      label: "Loans", 
+      icon: BiMoneyWithdraw, 
+      path: routes.LOANS 
+    },
     {
       id: "deposits",
       label: "Deposits",
@@ -43,10 +49,22 @@ export default function DashboardLayout({
       path: routes.DEPOSITS,
     },
     {
-      id: "settings",
-      label: "Account Settings",
-      icon: Settings,
-      path: routes.SETTINGS,
+      id: "security",
+      label: "Security",
+      icon: MdSecurity,
+      path: routes.SECURITY,
+    },
+    {
+      id: "profile",
+      label: "Profile",
+      icon: User,
+      path: routes.PROFILE,
+    },
+    {
+      id: "management",
+      label: "Management",
+      icon: PiBuildingOfficeBold,
+      path: routes.MANAGEMENT,
     },
     { 
       id: "users", 

@@ -17,12 +17,17 @@ export async function proxy(request: NextRequest) {
   const isPrivatePath =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/loans") ||
-    pathname.startsWith("/settings");
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/management") ||
+    pathname.startsWith("/deposits") ||
+    pathname.startsWith("/security") ||
+    pathname.startsWith("/users")
 
   const isAuthPath =
     pathname.startsWith("/auth/login") ||
     pathname.startsWith("/auth/register") ||
-    pathname.startsWith("/auth/forgot-password");
+    pathname.startsWith("/auth/forgot-password") ||
+    pathname.startsWith("/auth/login-employee");
 
   if (!token) {
     if (isPrivatePath) {
@@ -61,7 +66,10 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/loans/:path*",
-    "/settings/:path*",
+    "/security/:path*",
     "/auth/:path*",
+    "/management/:path*",
+    "/users/:path*",
+    "/deposits/:path*",
   ],
 };

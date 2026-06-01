@@ -50,10 +50,10 @@ export function UserTable({ users }: { users: User[] }) {
                 : "inactive";
 
               return (
-                <TableRow key={user.id} className="border-[#2C2621] text-xs">
-                  <TableCell className="font-medium">{i + 1}</TableCell>
+                <TableRow key={user.id} className="border-[#2C2621] text-xs hover:bg-transparent">
+                  <TableCell className="font-medium">{i + 1}.</TableCell>
 
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium capitalize">
                     {user.first_name} {user.last_name}
                   </TableCell>
 

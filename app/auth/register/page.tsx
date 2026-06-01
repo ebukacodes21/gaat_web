@@ -84,7 +84,6 @@ const SignupForm = () => {
         );
         setStatesData(sorted);
       })
-      // 🧠 FIX: Safely intercept failures so the background thread doesn't cascade memory leaks
       .catch((err) => {
         console.error("Safely bypassed remote map data failure:", err);
         toast.error("Geographic boundaries could not be retrieved. Refresh to try again.");

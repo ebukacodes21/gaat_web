@@ -30,7 +30,11 @@ const routeMap: Record<string, string> = {
   update_loan_type: ApiConfig.UpdateLoanType,
   user: ApiConfig.user,
   users: ApiConfig.users,
-  query_user: ApiConfig.queryUser
+  query_user: ApiConfig.queryUser,
+  staffs: ApiConfig.staffs,
+  create_staff: ApiConfig.createStaff,
+  update_staff: ApiConfig.updateStaff,
+  manage_staff: ApiConfig.manageStaff,
 };
 
 /**
@@ -134,6 +138,7 @@ async function handleProxyRequest(
 
     return response;
   } catch (error: any) {
+    console.log(error)
     return NextResponse.json(
       {
         success: false,

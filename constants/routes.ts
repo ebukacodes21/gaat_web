@@ -16,7 +16,10 @@ export const routes = {
     DASHBOARD: '/dashboard',
     LOANS: '/loans',
     DEPOSITS: '/deposits',
-    SETTINGS: '/settings',
     USERS: '/users',
+    PROFILE: "/profile",
+    MANAGEMENT: "/management",
+    SECURITY: "/security",
+    
 
 }

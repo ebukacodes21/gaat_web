@@ -76,7 +76,7 @@ export default function LoanTypeManagement() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-bold text-[#FAF8F5]">
+        <h2 className="text-md md:text-lg font-bold text-[#FAF8F5]">
           Configured Loan Types
         </h2>
         <Button
@@ -91,7 +91,7 @@ export default function LoanTypeManagement() {
         </Button>
       </div>
 
-      <div className="border border-[#2C2621] bg-[#1A1715] rounded-xl overflow-hidden">
+      <div className="border border-[#2C2621] bg-[#1A1715] overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="border-[#2C2621] hover:bg-transparent">
@@ -113,7 +113,7 @@ export default function LoanTypeManagement() {
               </TableRow>
             ) : (
               loanTypes.map((loan) => (
-                <TableRow key={loan.id} className="border-[#2C2621]">
+                <TableRow key={loan.id} className="border-[#2C2621] hover:bg-transparent">
                   <TableCell className="text-[#FAF8F5] font-semibold">
                     {loan.name}
                   </TableCell>

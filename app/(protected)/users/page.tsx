@@ -52,29 +52,6 @@ export default function DepositPage() {
       <div className="flex-1 min-w-0 flex flex-col">
         {/* WORKSPACE APP MAIN FRAMING AREA */}
         <main className="p-8 max-w-7xl w-full mx-auto space-y-8 flex-1">
-          {/* PROFILE WELCOME BLOCK */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-[#FAF8F5]">
-                Users Overview
-              </h1>
-              <p className="text-xs text-[#A39990] mt-0.5">
-                View, manage, and monitor all registered users and their account
-                activity in one place.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fetchUsers(page)}
-                className="h-9 gap-1.5 text-xs bg-[#211E1B] border-[#332D28] hover:bg-[#26221E] hover:text-[#FAF8F5] text-[#E6E1DC] rounded-xl"
-              >
-                <RefreshCw className="h-3.5 w-3.5" /> Refresh Records
-              </Button>
-            </div>
-          </div>
-
           {/* LOAD DIAGNOSTIC TILES */}
           {loading && (
             <div className="flex flex-col items-center justify-center min-h-[350px] w-full gap-3">
@@ -109,14 +86,36 @@ export default function DepositPage() {
           {/* MAIN SECURE SYSTEM CONSOLE VIEWPORT */}
           {!loading && !errorMessage && (
             <>
+              {/* PROFILE WELCOME BLOCK */}
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight text-[#FAF8F5]">
+                    Users Overview
+                  </h1>
+                  <p className="text-xs text-[#A39990] mt-0.5">
+                    View, manage, and monitor all registered users and their
+                    account activity in one place.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchUsers(page)}
+                    className="h-9 gap-1.5 text-xs bg-[#211E1B] border-[#332D28] hover:bg-[#26221E] hover:text-[#FAF8F5] text-[#E6E1DC] rounded-xl"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" /> Refresh Records
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-6 animate-in fade-in duration-300">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 items-start">
                   <div className="lg:col-span-2 space-y-4">
-                    <Tabs defaultValue="loans" className="w-full">
+                    <Tabs defaultValue="users" className="w-full">
                       <div className="flex items-center justify-between border-b border-[#2C2621] pb-1 mb-4">
                         <TabsList className="bg-[#1E1A17] border border-[#2E2823] p-1 rounded-xl">
                           <TabsTrigger
-                            value="loans"
+                            value="users"
                             className="text-sm text-white px-4 py-1.5 rounded-lg data-[state=active]:bg-[#2C2621] data-[state=active]:text-[#FAF8F5] transition-all"
                           >
                             ALL USERS
@@ -124,13 +123,13 @@ export default function DepositPage() {
                         </TabsList>
                       </div>
 
-                      {/* DYNAMIC LOANS TAB SECTION CONTAINER */}
-                      <TabsContent value="loans" className="mt-0">
+                      {/* DYNAMIC users TAB SECTION CONTAINER */}
+                      <TabsContent value="users" className="mt-0">
                         {users.length > 0 ? (
                           <UserTable users={users} />
                         ) : (
                           <div className="p-8 text-center text-[#70665C]">
-                            No Loans found.
+                            No Users found.
                           </div>
                         )}
                       </TabsContent>

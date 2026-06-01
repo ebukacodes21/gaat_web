@@ -13,7 +13,7 @@ import Link from "next/link";
 import { routes } from "@/constants";
 import { Deposit } from "@/types";
 
-export function DepositTable({ data }: { data: Deposit[] }) {
+export function StaffTable({ data }: { data: any[] }) {
 
   return (
     <div className="space-y-4">
@@ -31,7 +31,7 @@ export function DepositTable({ data }: { data: Deposit[] }) {
           </TableHeader>
           <TableBody>
             {data.map((item, i) => (
-              <TableRow key={item.id} className="border-[#2C2621] text-xs text-[#FAF8F5] hover:bg-transparent">
+              <TableRow key={item.id} className="border-[#2C2621] text-xs text-[#FAF8F5]">
                 <TableCell>{i + 1}</TableCell>
                 <TableCell className="font-semibold">{item.type}</TableCell>
                 <TableCell className="text-right font-mono font-bold">

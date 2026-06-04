@@ -28,8 +28,11 @@ export default function LoanDetailsPage() {
   const [error, setError] = useState("");
   const [processing, setProcessing] = useState<string | null>(null);
   const [isRepayOpen, setIsRepayOpen] = useState(false);
+  const [isDepositing, setIsDepositing] = useState(false)
 
   const role = getUserRole();
+
+  const allowedRoles = ["admin", "supervisor", "staff"];
 
   const fetchLoanDetails = async () => {
     setLoading(true);
@@ -64,14 +67,13 @@ export default function LoanDetailsPage() {
   // Update your handleAction call to trigger the modal first
   const initiateRepayment = () => setIsRepayOpen(true);
 
-  const processRepayment = async ({
-    amount,
-    receipt,
-  }: {
-    amount: number;
-    receipt: string;
-  }) => {
+  const processRepayment = async ({amount,receipt}: {amount: number, receipt: string}) => {
+    if (isNaN(amount) || amount < 0) {
+      toast.error("amount must be a number and greater than 0")
+      return
+    }
     setProcessing("repay");
+    setIsDepositing(true)
 
     try {
       const res = await apiCall(`/api/request_deposit`, "POST", {
@@ -86,6 +88,7 @@ export default function LoanDetailsPage() {
     } finally {
       setIsRepayOpen(false);
       setProcessing(null);
+      setIsDepositing(false)
     }
   };
 
@@ -147,7 +150,7 @@ export default function LoanDetailsPage() {
             <div className="flex flex-wrap items-center gap-2 bg-[#211E1B] p-2 rounded-2xl border border-[#332D28]">
               {/* Primary Action */}
               {/* Status Management - Grouped tightly */}
-              {role && role === "staff" ? (
+              {allowedRoles.includes(role!) ? (
                 <div className="flex flex-wrap items-center gap-2">
                   {[
                     { action: "forwarded", tag: "Forward" },
@@ -184,7 +187,7 @@ export default function LoanDetailsPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={loan.status === "pending"}
+                    disabled={loan.status === "pending" || loan.status === "forwarded"}
                     onClick={initiateRepayment}
                     className="h-8 px-4 rounded-lg text-[10px] font-bold uppercase tracking-widest border-[#2C2621] text-[#E6A15C]"
                   >
@@ -237,6 +240,14 @@ export default function LoanDetailsPage() {
                   {
                     label: "Total Paid / Unpaid",
                     val: `₦${Number(loan?.total_repaid).toLocaleString()} / ₦${Number(loan?.total_unpaid).toLocaleString()}`,
+                  },
+                  {
+                    label: "Repayments Made",
+                    val: loan?.number_of_repayments,
+                  },
+                  {
+                    label: "Pending Installment Pmt",
+                    val: `₦${Number(loan?.amount_paid_towards_next_installment).toLocaleString()}`,
                   },
                   {
                     label: "Due Date",
@@ -358,6 +369,7 @@ export default function LoanDetailsPage() {
             isOpen={isRepayOpen}
             onClose={() => setIsRepayOpen(false)}
             onConfirm={processRepayment}
+            isLoading={isDepositing}
           />
         </>
       )}

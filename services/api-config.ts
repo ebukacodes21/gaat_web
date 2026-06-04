@@ -31,6 +31,7 @@ const ApiConfig = {
 
   createLoanType: `${main}/loan-types/create`,
   UpdateLoanType: `${main}/loan-types/update`,
+  adminLoanTypes: `${main}/loan-types/admin`,
 
   createStaff: `${main}/staffs/create`,
   staffs: `${main}/staffs`,

@@ -41,9 +41,11 @@ export default function DepositDetailsPage() {
   }, [id]);
 
   const handleAction = async (action: string) => {
+    console.log(action)
     setProcessing(action);
     try {
-      await apiCall(`/api/manage_deposit`, "PATCH", { id, action });
+      const res = await apiCall(`/api/manage_deposit`, "PATCH", { id, action });
+      toast.success(res.message)
       await fetchDeposit();
     } catch (err) {
       toast.error(formatErr(err));
@@ -52,7 +54,8 @@ export default function DepositDetailsPage() {
     }
   };
 
-  const role = getUserRole()
+  const role = getUserRole();
+  const allowedRoles = ["admin", "supervisor", "staff"];
 
   return (
     <div className="p-8 max-w-7xl w-full mx-auto space-y-8">
@@ -88,60 +91,64 @@ export default function DepositDetailsPage() {
                 <ArrowLeft className="h-4 w-4 mr-2" /> Back to Overview
               </Button>
               <div className="flex items-center gap-3 mt-2">
-                <h1 className="text-2xl font-bold text-[#FAF8F5]">
-                  {deposit.type}
-                </h1>
+                <h1 className="text-2xl font-bold text-[#FAF8F5]">Deposit</h1>
                 {/* ADDED STATUS BADGE HERE */}
                 <div
                   className={`px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                    deposit.status === "approved"
+                    deposit?.status === "approved"
                       ? "bg-emerald-950/30 border-emerald-900/50 text-emerald-400"
-                      : deposit.status === "pending"
+                      : deposit?.status === "pending"
                         ? "bg-amber-950/30 border-amber-900/50 text-amber-400"
-                        : "bg-neutral-900 border-neutral-700 text-neutral-400"
+                        : deposit?.status === "forwarded"
+                          ? "bg-blue-950/30 border-blue-900/50 text-blue-400"
+                          : deposit?.status === "rejected"
+                            ? "bg-red-950/30 border-red-900/50 text-red-400"
+                            : "bg-neutral-900 border-neutral-700 text-neutral-400"
                   }`}
                 >
-                  {deposit.status}
+                  {deposit?.status}
                 </div>
               </div>
               <p className="text-sm text-[#8C8176] font-mono mt-1">
-                ID: {deposit.id}
+                ID: {deposit?.id}
               </p>
             </div>
 
-
-            {role && role === "user" && <div className="flex flex-wrap items-center gap-2 bg-[#211E1B] p-2 rounded-2xl border border-[#332D28]">
+            <div className="flex flex-wrap items-center gap-2 bg-[#211E1B] p-2 rounded-2xl border border-[#332D28]">
+              {/* Primary Action */}
               {/* Status Management - Grouped tightly */}
-              <div className="flex flex-wrap items-center gap-2">
-                {[
-                  { action: "forwarded", tag: "Forward" },
-                  { action: "approved", tag: "Approve" },
-                  { action: "rejected", tag: "Reject" },
-                ].map((item) => (
-                  <Button
-                    key={item.action}
-                    size="sm"
-                    variant="outline"
-                    disabled={!!processing}
-                    onClick={() => handleAction(item.action)}
-                    className={`
-                      h-8 px-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all
-                      ${
-                        processing === item.action
-                          ? "bg-[#2C2621] border-[#3D352E] text-[#8C8176]"
-                          : "bg-[#1A1715] border-[#2C2621] text-[#A39990] hover:border-[#3D352E]"
-                      }
-                    `}
-                  >
-                    {processing === item.action ? (
-                      <RefreshCw className="h-3 w-3 animate-spin" />
-                    ) : (
-                      item.tag
-                    )}
-                  </Button>
-                ))}
-              </div>
-            </div>}
+              {allowedRoles.includes(role!) && (
+                <div className="flex flex-wrap items-center gap-2">
+                  {[
+                    { action: "forwarded", tag: "Forward" },
+                    { action: "approved", tag: "Approve" },
+                    { action: "rejected", tag: "Reject" },
+                  ].map((item) => (
+                    <Button
+                      key={item.action}
+                      size="sm"
+                      variant="outline"
+                      disabled={!!processing}
+                      onClick={() => handleAction(item.action)}
+                      className={`
+                        h-8 px-4 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all
+                        ${
+                          processing === item.action
+                            ? "bg-[#2C2621] border-[#3D352E] text-[#8C8176]"
+                            : "bg-[#1A1715] border-[#2C2621] text-[#A39990] hover:border-[#3D352E]"
+                        }
+                      `}
+                    >
+                      {processing === item.action ? (
+                        <RefreshCw className="h-3 w-3 animate-spin" />
+                      ) : (
+                        item.tag
+                      )}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

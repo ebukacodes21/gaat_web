@@ -45,7 +45,7 @@ export default function DashboardLayout({
       label: "Overview",
       icon: LayoutDashboard,
       path: routes.DASHBOARD,
-      roles: ["admin", "supervisor", "staff", "user"],
+      roles: ["user"],
     },
     {
       id: "loans",

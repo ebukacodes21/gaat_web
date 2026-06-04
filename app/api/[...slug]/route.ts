@@ -35,6 +35,7 @@ const routeMap: Record<string, string> = {
   create_staff: ApiConfig.createStaff,
   update_staff: ApiConfig.updateStaff,
   manage_staff: ApiConfig.manageStaff,
+  admin_loan_types: ApiConfig.adminLoanTypes,
 };
 
 /**

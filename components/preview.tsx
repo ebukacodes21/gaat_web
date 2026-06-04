@@ -74,7 +74,7 @@ import { routes } from "@/constants";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 
 type PreviewProp = {
-  customRate: string;
+  customRate: number;
   loanId: string;
   type: string;
   amount: number;
@@ -88,6 +88,8 @@ type PreviewProp = {
   onclose: () => void;
   isDialogOpen: boolean;
 };
+
+const ADMIN_FEE = 0.02
 
 export const Preview: FC<PreviewProp> = ({
   customRate,
@@ -142,7 +144,7 @@ export const Preview: FC<PreviewProp> = ({
   const [isValidating, setIsValidating] = useState<boolean>(false);
 
   const adminFee =
-    type === "Proof of Funds Loan" ? 0.005 * amount : 0.01 * amount;
+    type === "Proof of Funds Loan" ? 0.005 * amount : ADMIN_FEE * amount;
 
   const { control, handleSubmit, reset, setValue, watch } = useForm<
     z.infer<typeof LoanRequestSchema>
@@ -257,7 +259,7 @@ export const Preview: FC<PreviewProp> = ({
         admin_fee_receipt: adminFeeReceipt,
         collateral_document: collateralDocument,
         loan_interest: loanInterest,
-        override_rate: customRate !== null ? customRate : "",
+        override_rate: customRate === null ? 0.0 : customRate / 100
       });
 
       reset();
@@ -267,7 +269,7 @@ export const Preview: FC<PreviewProp> = ({
         setSuccess("");
         setShowForm(false);
         onclose();
-        router.push(routes.DASHBOARD);
+        router.refresh();
       }, 2000);
     } catch (error) {
       setError(formatErr(error));
@@ -777,7 +779,7 @@ export const Preview: FC<PreviewProp> = ({
                         />
                         {isValidating && (
                           <div className="flex gap-2 items-center">
-                            <p className="text-white text-sm">validating Account Holder</p>
+                            <p className="text-white text-sm">validating account holder</p>
                             <ClipLoader size={20} color="white"/>
                           </div>
                         )}

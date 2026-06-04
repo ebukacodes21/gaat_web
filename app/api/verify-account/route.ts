@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const response = await axios.get(
-      `https://api.paystack.co/bank/resolve?account_number=${accountNumber}&bank_code=${bankCode}`,
+      `https://api.paystack.co/bank/resolve?account_number=${accountNumber}&bank_code=${"001"}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,

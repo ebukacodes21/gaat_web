@@ -19,6 +19,7 @@ export function RepaymentModal({
   onClose,
   onConfirm,
   isProcessing,
+  isLoading
 }: any) {
   // 1. Force the amount to be at least the monthly payment
   const [amount, setAmount] = useState<number>(Number(loan?.monthly_payment));
@@ -29,8 +30,7 @@ export function RepaymentModal({
   // 2. Validation: Check if the user is paying at least the monthly installment
   const isAmountValid = useMemo(() => {
     return (
-      amount >= Number(loan?.monthly_payment) &&
-      amount <= Number(loan?.total_unpaid)
+      amount >= Number(loan?.monthly_payment)
     );
   }, [amount, loan]);
 
@@ -84,8 +84,7 @@ export function RepaymentModal({
             />
             {!isAmountValid && (
               <p className="text-[10px] text-red-500 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" /> Please enter an amount
-                between monthly payment and total remaining balance.
+                <AlertCircle className="h-3 w-3" /> Minimum Amount to repay is: {formatCurrency(loan?.monthly_payment)}
               </p>
             )}
           </div>
@@ -153,7 +152,7 @@ export function RepaymentModal({
           <Button
             className="w-full h-11 bg-[#D61F28] hover:bg-[#b81a22] text-white font-semibold rounded-[8px]"
             onClick={() => onConfirm({ amount, receipt })}
-            disabled={isProcessing || !receipt || !isAmountValid}
+            disabled={isProcessing || !receipt || !isAmountValid || isLoading}
           >
             {isProcessing ? (
               <Loader2 className="animate-spin h-4 w-4" />

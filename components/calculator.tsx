@@ -18,7 +18,14 @@ import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Percent, Calendar, Settings2, ArrowRight } from "lucide-react";
+import {
+  Percent,
+  Calendar,
+  Settings2,
+  ArrowRight,
+  Plus,
+  Minus,
+} from "lucide-react";
 
 import { Preview } from "./preview";
 
@@ -80,17 +87,18 @@ export const Calculator = ({ auth }: Props) => {
 
   const calc = useMemo(() => {
     const principal = amount[0];
-    const r = effectiveRate / 12;
-    const monthly =
-      r === 0
-        ? principal / term
-        : (principal * (r * Math.pow(1 + r, term))) /
-          (Math.pow(1 + r, term) - 1);
-    const total = monthly * term;
-    const interest = total - principal;
-    const monthlyInterest = interest / term;
 
-    return { monthly, total, interest, monthlyInterest };
+    // Logic: Flat monthly interest rate
+    // Total Interest = Principal * Rate * Months
+    const totalInterest = principal * effectiveRate * term;
+    const total = principal + totalInterest;
+
+    return {
+      monthly: (principal + totalInterest) / term,
+      total: total,
+      interest: totalInterest,
+      monthlyInterest: totalInterest / term,
+    };
   }, [amount, term, effectiveRate]);
 
   // Generates a dynamic due date string matching your Preview requirements
@@ -112,7 +120,7 @@ export const Calculator = ({ auth }: Props) => {
 
   return (
     <Card className="w-full border-neutral-200/60 bg-white shadow-2xl dark:border-neutral-800 dark:bg-neutral-950">
-      <CardHeader >
+      <CardHeader>
         <div className="flex items-center justify-between">
           <Badge
             variant="secondary"
@@ -132,17 +140,41 @@ export const Calculator = ({ auth }: Props) => {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-2">
+      <CardContent className="">
         {/* AMOUNT SECTION */}
-        <div className="space-y-2">
+        <div>
           <div className="flex items-center justify-between">
             <Label className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
               Desired Financing
             </Label>
-            <span className="text-xl font-black tracking-tight text-neutral-900 dark:text-neutral-50">
-              {format(amount[0])}
-            </span>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="h-8 w-8"
+                onClick={() => setAmount([Math.max(MIN, amount[0] - 5000)])}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+
+              <span className="text-xl font-black tracking-tight text-neutral-900 dark:text-neutral-50 min-w-[140px] text-center">
+                {format(amount[0])}
+              </span>
+
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                className="h-8 w-8"
+                onClick={() => setAmount([Math.min(MAX, amount[0] + 5000)])}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
+
           <div className="pt-1.5">
             <Slider
               value={amount}
@@ -153,6 +185,7 @@ export const Calculator = ({ auth }: Props) => {
               className="py-2 cursor-pointer"
             />
           </div>
+
           <div className="flex justify-between text-[11px] font-medium text-muted-foreground">
             <span>Min: {format(MIN).split(".")[0]}</span>
             <span>Max: {format(MAX).split(".")[0]}</span>
@@ -160,7 +193,7 @@ export const Calculator = ({ auth }: Props) => {
         </div>
 
         {/* LOAN TYPES SELECTION */}
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 mt-2">
           <Label className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
             Product Framework
           </Label>
@@ -210,7 +243,7 @@ export const Calculator = ({ auth }: Props) => {
         </div>
 
         {/* REPAYMENT DURATION */}
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 mt-3">
           <Label className="text-sm font-semibold text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-muted-foreground" /> Repayment
             Schedule
@@ -253,21 +286,39 @@ export const Calculator = ({ auth }: Props) => {
               <Settings2 className="mr-1.5 h-3.5 w-3.5" />
               {useCustom
                 ? "Deactivate custom override"
-                : "Apply administrative interest rate"}
+                : "Apply custom interest rate for request"}
             </Button>
             {useCustom && (
               <div className="relative mt-2">
                 <Percent className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+
                 <Input
                   type="number"
-                  placeholder="Override percentage (e.g. 14)"
+                  placeholder="Override percentage (e.g. 8)"
                   className="h-9 pl-9 text-xs"
+                  step={1}
+                  min={1}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  max={100}
                   value={customRate ?? ""}
-                  onChange={(e) =>
-                    setCustomRate(
-                      e.target.value === "" ? null : Number(e.target.value),
-                    )
-                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+
+                    if (val === "") {
+                      setCustomRate(null);
+                      return;
+                    }
+
+                    // only allow whole digits
+                    if (!/^\d+$/.test(val)) return;
+
+                    const num = parseInt(val, 10);
+
+                    if (num < 1 || num > 100) return;
+
+                    setCustomRate(num);
+                  }}
                 />
               </div>
             )}
@@ -310,7 +361,7 @@ export const Calculator = ({ auth }: Props) => {
 
         {/* TRANSACTION TRIGGER */}
         {!auth ? (
-          <p className="text-center text-[11px] font-medium text-muted-foreground">
+          <p className="text-center text-[12px] mt-1.5 font-medium text-muted-foreground">
             Calculated variables present an estimation model. Final underwriting
             review applies.
           </p>
@@ -324,7 +375,7 @@ export const Calculator = ({ auth }: Props) => {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Preview
-              customRate={String(customRate)}
+              customRate={customRate!}
               loanId={loanId}
               type={type}
               amount={amount[0]}

@@ -65,7 +65,7 @@ const LoginEmployee = () => {
       setAuthToken(result.data.token)
 
       toast.success(result.message)
-      router.push(routes.DASHBOARD);
+      router.push(routes.LOANS);
     } catch (error) {
       setError(formatErr(error));
     } finally {

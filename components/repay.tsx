@@ -152,7 +152,7 @@ export function RepaymentModal({
           <Button
             className="w-full h-11 bg-[#D61F28] hover:bg-[#b81a22] text-white font-semibold rounded-[8px]"
             onClick={() => onConfirm({ amount, receipt })}
-            disabled={isProcessing || !receipt || !isAmountValid || isLoading}
+            disabled={isProcessing || !receipt || isLoading}
           >
             {isProcessing ? (
               <Loader2 className="animate-spin h-4 w-4" />
